@@ -5,6 +5,7 @@ interface PlantDetailProps {
   plant: Plant;
   onBack: () => void;
   onEdit: () => void;
+  onDelete: (plantId: string) => void;
   onRecordCare: (plantId: string, type: CareType) => void;
   onDeleteCareLog: (plantId: string, logId: string) => void;
 }
@@ -14,7 +15,7 @@ const careLabels: Record<CareType, string> = {
   fertilizing: '施肥',
 };
 
-export default function PlantDetail({ plant, onBack, onEdit, onRecordCare, onDeleteCareLog }: PlantDetailProps) {
+export default function PlantDetail({ plant, onBack, onEdit, onDelete, onRecordCare, onDeleteCareLog }: PlantDetailProps) {
   const tips = getCareTips(plant.name);
   return (
     <section className="page-stack">
@@ -36,6 +37,7 @@ export default function PlantDetail({ plant, onBack, onEdit, onRecordCare, onDel
           <button className="primary-button" type="button" onClick={() => onRecordCare(plant.id, 'fertilizing')}>记录施肥</button>
         ) : null}
         <button className="secondary-button" type="button" onClick={onEdit}>编辑</button>
+        <button className="ghost-button delete-plant" type="button" onClick={() => onDelete(plant.id)}>删除</button>
       </div>
 
       {tips ? (

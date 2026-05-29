@@ -5,7 +5,7 @@ import PlantForm from './components/PlantForm';
 import TaskBoard from './components/TaskBoard';
 import { countTodayTasks, getTasksByGroup } from './domain/careTasks';
 import { todayString } from './domain/dates';
-import { createPlant, deleteCareLog, recordCare, updatePlant } from './domain/plantActions';
+import { createPlant, deleteCareLog, deletePlant, recordCare, updatePlant } from './domain/plantActions';
 import { createDemoData } from './domain/seedData';
 import { loadPlants, savePlants } from './domain/storage';
 import type { CareTaskGroup, CareType, Plant, PlantFormValues, View } from './domain/types';
@@ -72,6 +72,12 @@ export default function App() {
     setModal('none');
   }
 
+  function handleDeletePlant(plantId: string) {
+    if (!window.confirm('确定要删除这盆植物吗？相关的养护记录也会被删除。')) return;
+    setPlants((currentPlants) => deletePlant(currentPlants, plantId));
+    setView('archive');
+  }
+
   function handleDeleteCareLog(plantId: string, logId: string) {
     setPlants((currentPlants) =>
       currentPlants.map((plant) => (plant.id === plantId ? deleteCareLog(plant, logId) : plant)),
@@ -105,6 +111,7 @@ export default function App() {
           plant={selectedPlant}
           onBack={() => setView('archive')}
           onEdit={openEditForm}
+          onDelete={handleDeletePlant}
           onRecordCare={handleRecordCare}
           onDeleteCareLog={handleDeleteCareLog}
         />

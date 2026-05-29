@@ -39,6 +39,10 @@ export function hasSameDayCareLog(plant: Plant, type: CareType, date: string): b
   return plant.careLogs.some((log) => log.type === type && log.date === date);
 }
 
+export function deletePlant(plants: Plant[], plantId: string): Plant[] {
+  return plants.filter((p) => p.id !== plantId);
+}
+
 export function deleteCareLog(plant: Plant, logId: string): Plant {
   return {
     ...plant,
