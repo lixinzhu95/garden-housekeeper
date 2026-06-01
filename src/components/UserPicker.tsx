@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 
 interface UserPickerProps {
   members: string[];
@@ -10,12 +10,26 @@ interface UserPickerProps {
 export default function UserPicker({ members, onSelect, onAddMember, onDeleteMember }: UserPickerProps) {
   const [showInput, setShowInput] = useState(members.length === 0);
   const [newName, setNewName] = useState('');
+  const [longPressing, setLongPressing] = useState<string | null>(null);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  function handleAdd() {
-    const trimmed = newName.trim();
-    if (!trimmed || members.includes(trimmed)) return;
-    onAddMember(trimmed);
-    onSelect(trimmed);
+  function handlePointerDown(name: string) {
+    timerRef.current = setTimeout(() => {
+      setLongPressing(null);
+      timerRef.current = null;
+      if (window.confirm(`确定要删除成员「${name}」吗？该成员的所有植物数据也会被删除。`)) {
+        onDeleteMember(name);
+      }
+    }, 600);
+    setLongPressing(name);
+  }
+
+  function handlePointerUp() {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+    setLongPressing(null);
   }
 
   return (
@@ -26,26 +40,29 @@ export default function UserPicker({ members, onSelect, onAddMember, onDeleteMem
         <p style={{ margin: '12px 0 0', color: '#64745f' }}>
           {showInput ? '给自己起个昵称吧' : '选择你的名字进入小花园'}
         </p>
+        {members.length > 0 && !showInput && (
+          <p style={{ margin: '8px 0 0', fontSize: 12, color: '#b58a7a' }}>
+            轻点进入 · 长按删除
+          </p>
+        )}
       </div>
 
       {members.length > 0 && !showInput && (
         <>
           <div className="member-grid">
             {members.map((name) => (
-              <div key={name} className="member-card-wrapper">
-                <button className="member-card" type="button" onClick={() => onSelect(name)}>
-                  <span className="member-avatar" aria-hidden="true">🌻</span>
-                  <strong>{name}</strong>
-                </button>
-                <button
-                  className="member-delete"
-                  type="button"
-                  onClick={() => onDeleteMember(name)}
-                  aria-label={`删除${name}`}
-                >
-                  ✕
-                </button>
-              </div>
+              <button
+                key={name}
+                className={`member-card${longPressing === name ? ' long-pressing' : ''}`}
+                type="button"
+                onClick={() => onSelect(name)}
+                onPointerDown={() => handlePointerDown(name)}
+                onPointerUp={handlePointerUp}
+                onPointerLeave={handlePointerUp}
+              >
+                <span className="member-avatar" aria-hidden="true">🌻</span>
+                <strong>{name}</strong>
+              </button>
             ))}
           </div>
           <button className="secondary-button" type="button" onClick={() => setShowInput(true)} style={{ width: '100%' }}>
