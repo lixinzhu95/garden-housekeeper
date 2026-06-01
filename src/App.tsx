@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import PlantArchive from './components/PlantArchive';
 import PlantDetail from './components/PlantDetail';
 import PlantForm from './components/PlantForm';
@@ -41,19 +41,12 @@ export default function App() {
   const [modal, setModal] = useState<Modal>('none');
   const today = todayString();
 
-  useEffect(() => {
-    if (currentUser) {
-      syncFromServer(currentUser).then((serverData) => {
-        if (serverData) setPlants(serverData);
-      });
-    }
-  }, [currentUser]);
-
+  // Save whenever plants change
   useEffect(() => {
     if (currentUser) {
       savePlants(plants);
     }
-  }, [plants, currentUser]);
+  }, [plants]);
 
   const selectedPlant = plants.find((plant) => plant.id === selectedPlantId) ?? null;
   const currentTasks = useMemo(
@@ -69,6 +62,15 @@ export default function App() {
       const updated = [...members, name];
       setMembers(updated);
       saveMemberList(updated);
+    }
+    // Load data synchronously before React re-renders
+    const localData = loadPlants();
+    setPlants(localData.length > 0 ? localData : []);
+    // Sync from server in background (if server has more data)
+    if (localData.length === 0) {
+      syncFromServer(name).then((serverData) => {
+        if (serverData) setPlants(serverData);
+      });
     }
     setView('tasks');
     setModal('none');
