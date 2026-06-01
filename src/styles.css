@@ -367,6 +367,39 @@ h1 {
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
+.member-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.member-card {
+  display: grid;
+  gap: 10px;
+  justify-items: center;
+  min-height: 100px;
+  border: 1px solid rgba(119, 154, 122, 0.2);
+  border-radius: 22px;
+  padding: 18px 12px;
+  background: rgba(255, 252, 242, 0.92);
+  color: inherit;
+  cursor: pointer;
+  text-align: center;
+  box-shadow: 0 10px 24px rgba(83, 103, 79, 0.08);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.member-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 16px 36px rgba(83, 103, 79, 0.14);
+  border-color: rgba(111, 155, 114, 0.4);
+}
+
+.member-avatar {
+  font-size: 36px;
+  line-height: 1;
+}
+
 .plant-card:hover {
   transform: translateY(-3px);
   box-shadow: 0 16px 36px rgba(83, 103, 79, 0.14);

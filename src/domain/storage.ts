@@ -1,7 +1,11 @@
 import type { Plant, CareLog } from './types';
 
-const storageKey = 'garden-housekeeper-plants';
 const apiUrl = '/api/plants';
+const userKey = 'garden-housekeeper-user';
+
+function plantsKey(user: string): string {
+  return `garden-housekeeper-plants-${user}`;
+}
 
 function isValidCareLog(log: unknown): log is CareLog {
   if (typeof log !== 'object' || log === null) return false;
@@ -34,9 +38,9 @@ function isValidPlantArray(value: unknown): value is Plant[] {
   return Array.isArray(value) && value.every(isValidPlant);
 }
 
-function loadLocal(): Plant[] {
+function loadLocal(user: string): Plant[] {
   try {
-    const rawValue = localStorage.getItem(storageKey);
+    const rawValue = localStorage.getItem(plantsKey(user));
     if (!rawValue) return [];
     const parsedValue = JSON.parse(rawValue);
     return isValidPlantArray(parsedValue) ? parsedValue : [];
@@ -45,27 +49,52 @@ function loadLocal(): Plant[] {
   }
 }
 
+export function getCurrentUser(): string | null {
+  return localStorage.getItem(userKey);
+}
+
+export function setCurrentUser(name: string): void {
+  localStorage.setItem(userKey, name);
+}
+
+export function getMemberList(): string[] {
+  try {
+    const raw = localStorage.getItem('garden-housekeeper-members');
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
+}
+
+export function saveMemberList(members: string[]): void {
+  localStorage.setItem('garden-housekeeper-members', JSON.stringify(members));
+}
+
 export function loadPlants(): Plant[] {
-  return loadLocal();
+  const user = getCurrentUser();
+  if (!user) return [];
+  return loadLocal(user);
 }
 
 export function savePlants(plants: Plant[]): void {
-  localStorage.setItem(storageKey, JSON.stringify(plants));
+  const user = getCurrentUser();
+  if (!user) return;
+  localStorage.setItem(plantsKey(user), JSON.stringify(plants));
   try {
-    fetch(apiUrl, {
+    fetch(`${apiUrl}?user=${encodeURIComponent(user)}`, {
       method: 'POST',
       body: JSON.stringify(plants),
     }).catch(() => {});
   } catch {}
 }
 
-export async function syncFromServer(): Promise<Plant[] | null> {
+export async function syncFromServer(user: string): Promise<Plant[] | null> {
   try {
-    const res = await fetch(apiUrl);
+    const res = await fetch(`${apiUrl}?user=${encodeURIComponent(user)}`);
     if (!res.ok) return null;
     const data = await res.json();
     if (!isValidPlantArray(data)) return null;
-    localStorage.setItem(storageKey, JSON.stringify(data));
+    localStorage.setItem(plantsKey(user), JSON.stringify(data));
     return data;
   } catch {
     return null;

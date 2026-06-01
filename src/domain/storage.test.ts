@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Plant, CareLog } from './types';
-import { loadPlants, savePlants } from './storage';
+import { loadPlants, savePlants, setCurrentUser } from './storage';
 
 const validPlant: Plant = {
   id: 'plant-1',
@@ -27,6 +27,7 @@ const validPlantWithLog: Plant = {
 describe('plant storage', () => {
   beforeEach(() => {
     localStorage.clear();
+    setCurrentUser('test');
   });
 
   it('returns an empty list when storage is empty', () => {

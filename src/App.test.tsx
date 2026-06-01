@@ -2,14 +2,16 @@ import { act, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import App from './App';
 import type { Plant } from './domain/types';
+import { setCurrentUser } from './domain/storage';
 
 function setPlants(plants: Plant[]) {
-  localStorage.setItem('garden-housekeeper-plants', JSON.stringify(plants));
+  localStorage.setItem('garden-housekeeper-plants-test', JSON.stringify(plants));
 }
 
 describe('Garden Housekeeper app', () => {
   beforeEach(() => {
     localStorage.clear();
+    setCurrentUser('test');
     vi.useFakeTimers();
     vi.setSystemTime(new Date(2026, 4, 8));
   });
@@ -135,6 +137,6 @@ describe('Garden Housekeeper app', () => {
 
     render(<App />);
 
-    expect(localStorage.getItem('garden-housekeeper-plants')).toContain('绿萝');
+    expect(localStorage.getItem('garden-housekeeper-plants-test')).toContain('绿萝');
   });
 });
