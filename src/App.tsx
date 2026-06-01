@@ -22,7 +22,12 @@ type Modal = 'none' | 'add' | 'edit';
 
 export default function App() {
   const [currentUser, setCurrentUserState] = useState<string | null>(getCurrentUser);
-  const [members, setMembers] = useState<string[]>(() => getMemberList());
+  const [members, setMembers] = useState<string[]>(() => {
+    const list = getMemberList();
+    if (list.length === 0) return [];
+    if (list.every((m) => ['妈妈', '爸爸', '我'].includes(m))) return [];
+    return list.filter((m) => !['妈妈', '爸爸', '我'].includes(m));
+  });
   const [plants, setPlants] = useState<Plant[]>(() =>
     currentUser ? loadPlants() : [],
   );
