@@ -7,7 +7,7 @@ interface PlantFormProps {
   onCancel: () => void;
 }
 
-const maxImageSizeBytes = 2 * 1024 * 1024;
+const maxImageSizeBytes = 20 * 1024 * 1024;
 
 function readFileAsDataUrl(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -37,7 +37,7 @@ export default function PlantForm({ plant, onSubmit, onCancel }: PlantFormProps)
     if (!file) return;
 
     if (file.size > maxImageSizeBytes) {
-      setError('图片不能超过 2MB');
+      setError('图片不能超过 20MB');
       return;
     }
 

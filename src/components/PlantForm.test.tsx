@@ -116,15 +116,15 @@ describe('PlantForm', () => {
   });
 
   describe('image validation', () => {
-    it('shows error when image size exceeds 2MB', async () => {
+    it('shows error when image size exceeds 20MB', async () => {
       const user = userEvent.setup();
       render(<PlantForm onSubmit={noop} onCancel={noop} />);
       const fileInput = screen.getByLabelText(/花草图片/);
       const file = new File(['test'], 'test.png', { type: 'image/png' });
-      Object.defineProperty(file, 'size', { value: 3 * 1024 * 1024 });
+      Object.defineProperty(file, 'size', { value: 25 * 1024 * 1024 });
 
       await user.upload(fileInput, file);
-      expect(screen.getByRole('alert')).toHaveTextContent('图片不能超过 2MB');
+      expect(screen.getByRole('alert')).toHaveTextContent('图片不能超过 20MB');
     });
 
     it('successfully sets image when file is valid', async () => {
