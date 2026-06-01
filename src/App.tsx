@@ -69,6 +69,8 @@ export default function App() {
       const updated = [...members, name];
       setMembers(updated);
       saveMemberList(updated);
+    } else {
+      saveMemberList(members); // sync existing list to server
     }
     // Load data synchronously before React re-renders
     const localData = loadPlants();
