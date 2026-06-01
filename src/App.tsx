@@ -6,22 +6,15 @@ import TaskBoard from './components/TaskBoard';
 import { countTodayTasks, getTasksByGroup } from './domain/careTasks';
 import { todayString } from './domain/dates';
 import { createPlant, deleteCareLog, deletePlant, recordCare, updatePlant } from './domain/plantActions';
-import { createDemoData } from './domain/seedData';
 import { loadPlants, savePlants } from './domain/storage';
 import type { CareTaskGroup, CareType, Plant, PlantFormValues, View } from './domain/types';
 
 type Modal = 'none' | 'add' | 'edit';
 
 export default function App() {
-  const [plants, setPlants] = useState<Plant[]>(() => {
-    const stored = loadPlants();
-    if (import.meta.env.MODE === 'test') return stored;
-    const demo = createDemoData();
-    const seen = new Set(demo.map((p) => p.id));
-    const merged = [...demo, ...stored.filter((p) => !seen.has(p.id))];
-    savePlants(merged);
-    return merged;
-  });
+  const [plants, setPlants] = useState<Plant[]>(() =>
+    loadPlants().filter((p) => !p.id.startsWith('demo-')),
+  );
   const [view, setView] = useState<View>('tasks');
   const [selectedGroup, setSelectedGroup] = useState<CareTaskGroup>('today');
   const [selectedPlantId, setSelectedPlantId] = useState<string | null>(null);
