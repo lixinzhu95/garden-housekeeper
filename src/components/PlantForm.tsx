@@ -8,6 +8,7 @@ interface PlantFormProps {
 }
 
 const maxImageSizeBytes = 20 * 1024 * 1024;
+const maxImageDimension = 800;
 
 function readFileAsDataUrl(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -21,6 +22,35 @@ function readFileAsDataUrl(file: File): Promise<string> {
     };
     reader.onerror = () => reject(reader.error);
     reader.readAsDataURL(file);
+  });
+}
+
+function compressImage(dataUrl: string): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      let { width, height } = img;
+      if (width <= maxImageDimension && height <= maxImageDimension) {
+        resolve(dataUrl);
+        return;
+      }
+      if (width > height) {
+        height = Math.round(height * (maxImageDimension / width));
+        width = maxImageDimension;
+      } else {
+        width = Math.round(width * (maxImageDimension / height));
+        height = maxImageDimension;
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) { resolve(dataUrl); return; }
+      ctx.drawImage(img, 0, 0, width, height);
+      resolve(canvas.toDataURL('image/jpeg', 0.8));
+    };
+    img.onerror = () => reject(new Error('Failed to load image'));
+    img.src = dataUrl;
   });
 }
 
@@ -43,7 +73,9 @@ export default function PlantForm({ plant, onSubmit, onCancel }: PlantFormProps)
 
     try {
       setError(null);
-      setImage(await readFileAsDataUrl(file));
+      const raw = await readFileAsDataUrl(file);
+      const compressed = await compressImage(raw);
+      setImage(compressed);
     } catch {
       setError('图片读取失败，请重试');
     }
