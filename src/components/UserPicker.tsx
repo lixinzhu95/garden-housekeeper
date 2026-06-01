@@ -72,7 +72,14 @@ export default function UserPicker({ members, onSelect, onAddMember, onDeleteMem
       )}
 
       {showInput && (
-        <form className="sheet-card form-stack" onSubmit={(e) => { e.preventDefault(); handleAdd(); }}>
+        <form className="sheet-card form-stack" onSubmit={(e) => {
+          e.preventDefault();
+          const trimmed = newName.trim();
+          if (trimmed && !members.includes(trimmed)) {
+            onAddMember(trimmed);
+            onSelect(trimmed);
+          }
+        }}>
           <label>
             你的昵称
             <input
