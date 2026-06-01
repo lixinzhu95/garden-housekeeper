@@ -6,7 +6,7 @@ import TaskBoard from './components/TaskBoard';
 import { countTodayTasks, getTasksByGroup } from './domain/careTasks';
 import { todayString } from './domain/dates';
 import { createPlant, deleteCareLog, deletePlant, recordCare, updatePlant } from './domain/plantActions';
-import { loadPlants, savePlants } from './domain/storage';
+import { loadPlants, savePlants, syncFromServer } from './domain/storage';
 import type { CareTaskGroup, CareType, Plant, PlantFormValues, View } from './domain/types';
 
 type Modal = 'none' | 'add' | 'edit';
@@ -24,6 +24,12 @@ export default function App() {
   useEffect(() => {
     savePlants(plants);
   }, [plants]);
+
+  useEffect(() => {
+    syncFromServer().then((serverData) => {
+      if (serverData) setPlants(serverData.filter((p) => !p.id.startsWith('demo-')));
+    });
+  }, []);
 
   const selectedPlant = plants.find((plant) => plant.id === selectedPlantId) ?? null;
   const currentTasks = useMemo(
