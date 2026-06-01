@@ -42,10 +42,10 @@ export default function App() {
   const [modal, setModal] = useState<Modal>('none');
   const today = todayString();
 
-  // Sync member list from server on mount
+  // Sync member list from server on mount (only if server has data)
   useEffect(() => {
     syncMembers().then((serverMembers) => {
-      if (serverMembers) setMembers(serverMembers);
+      if (serverMembers && serverMembers.length > 0) setMembers(serverMembers);
     });
   }, []);
 
