@@ -22,14 +22,13 @@ type Modal = 'none' | 'add' | 'edit';
 
 export default function App() {
   const [currentUser, setCurrentUserState] = useState<string | null>(getCurrentUser);
-  const [members, setMembers] = useState<string[]>(() => {
-    const list = getMemberList();
-    return list.length > 0 ? list : ['妈妈', '爸爸', '我'];
-  });
+  const [members, setMembers] = useState<string[]>(() => getMemberList());
   const [plants, setPlants] = useState<Plant[]>(() =>
     currentUser ? loadPlants() : [],
   );
   const [view, setView] = useState<View>('tasks');
+  const [editingName, setEditingName] = useState(false);
+  const [editNameValue, setEditNameValue] = useState('');
   const [selectedGroup, setSelectedGroup] = useState<CareTaskGroup>('today');
   const [selectedPlantId, setSelectedPlantId] = useState<string | null>(null);
   const [modal, setModal] = useState<Modal>('none');
@@ -59,6 +58,11 @@ export default function App() {
   function handleSelectUser(name: string) {
     setCurrentUser(name);
     setCurrentUserState(name);
+    if (!members.includes(name)) {
+      const updated = [...members, name];
+      setMembers(updated);
+      saveMemberList(updated);
+    }
     setView('tasks');
     setModal('none');
   }
@@ -67,6 +71,39 @@ export default function App() {
     const updated = [...members, name];
     setMembers(updated);
     saveMemberList(updated);
+  }
+
+  function handleEditName() {
+    setEditNameValue(currentUser ?? '');
+    setEditingName(true);
+  }
+
+  function handleSaveName() {
+    const trimmed = editNameValue.trim();
+    if (!trimmed || !currentUser) return;
+    // Update member list
+    const updated = members.map((m) => (m === currentUser ? trimmed : m));
+    if (!updated.includes(trimmed)) {
+      const idx = members.indexOf(currentUser);
+      if (idx >= 0) updated[idx] = trimmed;
+    }
+    setMembers(updated);
+    saveMemberList(updated);
+    // Migrate localStorage data to new name
+    const oldKey = `garden-housekeeper-plants-${currentUser}`;
+    const newKey = `garden-housekeeper-plants-${trimmed}`;
+    const data = localStorage.getItem(oldKey);
+    if (data) {
+      localStorage.setItem(newKey, data);
+      if (trimmed !== currentUser) localStorage.removeItem(oldKey);
+    }
+    setCurrentUser(trimmed);
+    setCurrentUserState(trimmed);
+    setEditingName(false);
+  }
+
+  function handleCancelEditName() {
+    setEditingName(false);
   }
 
   function handleSwitchUser() {
@@ -178,13 +215,29 @@ export default function App() {
 
   return (
     <main className="app-shell">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
-        <span style={{ fontSize: 14, color: '#72806a' }}>
-          🌱 {currentUser} 的小花园
-        </span>
-        <button className="ghost-button" type="button" onClick={handleSwitchUser} style={{ minHeight: 32, padding: '4px 12px', fontSize: 13 }}>
-          切换成员
-        </button>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4, gap: 8, flexWrap: 'wrap' }}>
+        {editingName ? (
+          <div style={{ display: 'flex', gap: 6, alignItems: 'center', flex: 1 }}>
+            <input
+              value={editNameValue}
+              onChange={(e) => setEditNameValue(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleSaveName()}
+              style={{ flex: 1, minHeight: 32, borderRadius: 8, border: '1px solid #d8cfae', padding: '4px 10px', background: '#fffdf7', color: '#314137' }}
+              autoFocus
+            />
+            <button className="ghost-button" type="button" onClick={handleSaveName} style={{ minHeight: 32, padding: '4px 10px', fontSize: 13 }}>保存</button>
+            <button className="ghost-button" type="button" onClick={handleCancelEditName} style={{ minHeight: 32, padding: '4px 10px', fontSize: 13 }}>取消</button>
+          </div>
+        ) : (
+          <>
+            <button type="button" onClick={handleEditName} style={{ border: 0, padding: 0, background: 'none', cursor: 'pointer', fontSize: 14, color: '#72806a' }}>
+              🌱 {currentUser} 的小花园 ✏️
+            </button>
+            <button className="ghost-button" type="button" onClick={handleSwitchUser} style={{ minHeight: 32, padding: '4px 12px', fontSize: 13 }}>
+              切换成员
+            </button>
+          </>
+        )}
       </div>
 
       <div className="view-content" key={`${view}-${modal}-${selectedPlantId ?? 'none'}`}>

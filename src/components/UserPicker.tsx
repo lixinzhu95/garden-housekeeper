@@ -7,13 +7,14 @@ interface UserPickerProps {
 }
 
 export default function UserPicker({ members, onSelect, onAddMember }: UserPickerProps) {
+  const [showInput, setShowInput] = useState(members.length === 0);
   const [newName, setNewName] = useState('');
 
   function handleAdd() {
     const trimmed = newName.trim();
     if (!trimmed || members.includes(trimmed)) return;
     onAddMember(trimmed);
-    setNewName('');
+    onSelect(trimmed);
   }
 
   return (
@@ -21,39 +22,46 @@ export default function UserPicker({ members, onSelect, onAddMember }: UserPicke
       <div className="hero-card">
         <p className="eyebrow">🌻 欢迎来到</p>
         <h1>花园管家</h1>
-        <p style={{ margin: '12px 0 0', color: '#64745f' }}>选择你的名字进入小花园</p>
+        <p style={{ margin: '12px 0 0', color: '#64745f' }}>
+          {showInput ? '给自己起个昵称吧' : '选择你的名字进入小花园'}
+        </p>
       </div>
 
-      {members.length > 0 && (
-        <div className="member-grid">
-          {members.map((name) => (
-            <button key={name} className="member-card" type="button" onClick={() => onSelect(name)}>
-              <span className="member-avatar" aria-hidden="true">
-                {name === '妈妈' ? '🌸' : name === '爸爸' ? '🌿' : name === '我' ? '🌱' : '🌻'}
-              </span>
-              <strong>{name}</strong>
-            </button>
-          ))}
-        </div>
+      {members.length > 0 && !showInput && (
+        <>
+          <div className="member-grid">
+            {members.map((name) => (
+              <button key={name} className="member-card" type="button" onClick={() => onSelect(name)}>
+                <span className="member-avatar" aria-hidden="true">🌻</span>
+                <strong>{name}</strong>
+              </button>
+            ))}
+          </div>
+          <button className="secondary-button" type="button" onClick={() => setShowInput(true)} style={{ width: '100%' }}>
+            + 添加新成员
+          </button>
+        </>
       )}
 
-      <div className="sheet-card form-stack" style={{ padding: '18px' }}>
-        <label>
-          添加新成员
-          <div style={{ display: 'flex', gap: 8 }}>
+      {showInput && (
+        <form className="sheet-card form-stack" onSubmit={(e) => { e.preventDefault(); handleAdd(); }}>
+          <label>
+            你的昵称
             <input
               value={newName}
               onChange={(e) => setNewName(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
-              placeholder="输入名字"
-              style={{ flex: 1 }}
+              placeholder="比如：妈妈、爸爸、小明……"
+              autoFocus
             />
-            <button className="primary-button" type="button" onClick={handleAdd} disabled={!newName.trim()}>
-              添加
-            </button>
+          </label>
+          <div className="button-row">
+            {members.length > 0 && (
+              <button className="secondary-button" type="button" onClick={() => setShowInput(false)}>返回</button>
+            )}
+            <button className="primary-button" type="submit" disabled={!newName.trim()}>确定</button>
           </div>
-        </label>
-      </div>
+        </form>
+      )}
     </section>
   );
 }
