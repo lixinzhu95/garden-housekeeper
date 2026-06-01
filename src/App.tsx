@@ -75,6 +75,13 @@ export default function App() {
     setModal('none');
   }
 
+  function handleDeleteMember(name: string) {
+    if (!window.confirm(`确定要删除成员「${name}」吗？该成员的所有植物数据也会被删除。`)) return;
+    const updated = members.filter((m) => m !== name);
+    setMembers(updated);
+    saveMemberList(updated);
+  }
+
   function handleAddMember(name: string) {
     const updated = [...members, name];
     setMembers(updated);
@@ -183,7 +190,7 @@ export default function App() {
   if (!currentUser) {
     return (
       <main className="app-shell">
-        <UserPicker members={members} onSelect={handleSelectUser} onAddMember={handleAddMember} />
+        <UserPicker members={members} onSelect={handleSelectUser} onAddMember={handleAddMember} onDeleteMember={handleDeleteMember} />
       </main>
     );
   }

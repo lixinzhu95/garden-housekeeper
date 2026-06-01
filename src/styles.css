@@ -400,6 +400,33 @@ h1 {
   line-height: 1;
 }
 
+.member-card-wrapper {
+  position: relative;
+}
+
+.member-delete {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 24px;
+  height: 24px;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(192, 57, 43, 0.85);
+  color: white;
+  font-size: 12px;
+  line-height: 1;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  transition: background 0.15s, transform 0.15s;
+}
+
+.member-delete:hover {
+  background: #c0392b;
+  transform: scale(1.15);
+}
+
 .plant-card:hover {
   transform: translateY(-3px);
   box-shadow: 0 16px 36px rgba(83, 103, 79, 0.14);

@@ -4,9 +4,10 @@ interface UserPickerProps {
   members: string[];
   onSelect: (name: string) => void;
   onAddMember: (name: string) => void;
+  onDeleteMember: (name: string) => void;
 }
 
-export default function UserPicker({ members, onSelect, onAddMember }: UserPickerProps) {
+export default function UserPicker({ members, onSelect, onAddMember, onDeleteMember }: UserPickerProps) {
   const [showInput, setShowInput] = useState(members.length === 0);
   const [newName, setNewName] = useState('');
 
@@ -31,10 +32,20 @@ export default function UserPicker({ members, onSelect, onAddMember }: UserPicke
         <>
           <div className="member-grid">
             {members.map((name) => (
-              <button key={name} className="member-card" type="button" onClick={() => onSelect(name)}>
-                <span className="member-avatar" aria-hidden="true">🌻</span>
-                <strong>{name}</strong>
-              </button>
+              <div key={name} className="member-card-wrapper">
+                <button className="member-card" type="button" onClick={() => onSelect(name)}>
+                  <span className="member-avatar" aria-hidden="true">🌻</span>
+                  <strong>{name}</strong>
+                </button>
+                <button
+                  className="member-delete"
+                  type="button"
+                  onClick={() => onDeleteMember(name)}
+                  aria-label={`删除${name}`}
+                >
+                  ✕
+                </button>
+              </div>
             ))}
           </div>
           <button className="secondary-button" type="button" onClick={() => setShowInput(true)} style={{ width: '100%' }}>
