@@ -41,12 +41,11 @@ export default function App() {
   const [modal, setModal] = useState<Modal>('none');
   const today = todayString();
 
-  // Save whenever plants change
-  useEffect(() => {
-    if (currentUser) {
-      savePlants(plants);
-    }
-  }, [plants]);
+  // Persist plants to localStorage + server
+  function persist(updated: Plant[]) {
+    if (!currentUser) return;
+    savePlants(updated);
+  }
 
   const selectedPlant = plants.find((plant) => plant.id === selectedPlantId) ?? null;
   const currentTasks = useMemo(
@@ -140,37 +139,45 @@ export default function App() {
   }
 
   function handleCreatePlant(values: PlantFormValues) {
-    setPlants((currentPlants) => [...currentPlants, createPlant(values, today)]);
+    const updated = [...plants, createPlant(values, today)];
+    setPlants(updated);
+    persist(updated);
     setModal('none');
     setView('archive');
   }
 
   function handleUpdatePlant(values: PlantFormValues) {
     if (!selectedPlant) return;
-    setPlants((currentPlants) =>
-      currentPlants.map((plant) => (plant.id === selectedPlant.id ? updatePlant(plant, values, today) : plant)),
+    const updated = plants.map((plant) =>
+      plant.id === selectedPlant.id ? updatePlant(plant, values, today) : plant,
     );
+    setPlants(updated);
+    persist(updated);
     setModal('none');
   }
 
   function handleDeletePlant(plantId: string) {
     if (!window.confirm('确定要删除这盆植物吗？相关的养护记录也会被删除。')) return;
-    setPlants((currentPlants) => deletePlant(currentPlants, plantId));
+    const updated = deletePlant(plants, plantId);
+    setPlants(updated);
+    persist(updated);
     setView('archive');
   }
 
   function handleDeleteCareLog(plantId: string, logId: string) {
-    setPlants((currentPlants) =>
-      currentPlants.map((plant) => (plant.id === plantId ? deleteCareLog(plant, logId) : plant)),
+    const updated = plants.map((plant) =>
+      plant.id === plantId ? deleteCareLog(plant, logId) : plant,
     );
+    setPlants(updated);
+    persist(updated);
   }
 
   function handleRecordCare(plantId: string, type: CareType) {
-    setPlants((currentPlants) =>
-      currentPlants.map((currentPlant) =>
-        currentPlant.id === plantId ? recordCare(currentPlant, type, today) : currentPlant,
-      ),
+    const updated = plants.map((currentPlant) =>
+      currentPlant.id === plantId ? recordCare(currentPlant, type, today) : currentPlant,
     );
+    setPlants(updated);
+    persist(updated);
   }
 
   if (!currentUser) {

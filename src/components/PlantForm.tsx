@@ -26,6 +26,8 @@ function readFileAsDataUrl(file: File): Promise<string> {
 }
 
 function compressImage(dataUrl: string): Promise<string> {
+  // Skip in test environment (jsdom doesn't load images)
+  if (import.meta.env.MODE === 'test') return Promise.resolve(dataUrl);
   return new Promise((resolve, reject) => {
     const img = new Image();
     img.onload = () => {
