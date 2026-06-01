@@ -72,6 +72,25 @@ export function getMemberList(): string[] {
 
 export function saveMemberList(members: string[]): void {
   localStorage.setItem('garden-housekeeper-members', JSON.stringify(members));
+  try {
+    fetch(`${apiUrl}?user=__members__`, {
+      method: 'POST',
+      body: JSON.stringify(members),
+    }).catch(() => {});
+  } catch {}
+}
+
+export async function syncMembers(): Promise<string[] | null> {
+  try {
+    const res = await fetch(`${apiUrl}?user=__members__`);
+    if (!res.ok) return null;
+    const data = await res.json();
+    if (!Array.isArray(data)) return null;
+    localStorage.setItem('garden-housekeeper-members', JSON.stringify(data));
+    return data;
+  } catch {
+    return null;
+  }
 }
 
 export function loadPlants(): Plant[] {

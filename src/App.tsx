@@ -15,6 +15,7 @@ import {
   savePlants,
   setCurrentUser,
   syncFromServer,
+  syncMembers,
 } from './domain/storage';
 import type { CareTaskGroup, CareType, Plant, PlantFormValues, View } from './domain/types';
 
@@ -40,6 +41,13 @@ export default function App() {
   const [selectedPlantId, setSelectedPlantId] = useState<string | null>(null);
   const [modal, setModal] = useState<Modal>('none');
   const today = todayString();
+
+  // Sync member list from server on mount
+  useEffect(() => {
+    syncMembers().then((serverMembers) => {
+      if (serverMembers) setMembers(serverMembers);
+    });
+  }, []);
 
   // Persist plants to localStorage + server
   function persist(updated: Plant[]) {
