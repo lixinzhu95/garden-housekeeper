@@ -53,8 +53,12 @@ export function getCurrentUser(): string | null {
   return localStorage.getItem(userKey);
 }
 
-export function setCurrentUser(name: string): void {
-  localStorage.setItem(userKey, name);
+export function setCurrentUser(name: string | null): void {
+  if (name === null) {
+    localStorage.removeItem(userKey);
+  } else {
+    localStorage.setItem(userKey, name);
+  }
 }
 
 export function getMemberList(): string[] {
