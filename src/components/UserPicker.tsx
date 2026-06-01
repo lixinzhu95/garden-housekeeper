@@ -50,7 +50,7 @@ export default function UserPicker({ members, onSelect, onAddMember }: UserPicke
             <input
               value={newName}
               onChange={(e) => setNewName(e.target.value)}
-              placeholder="比如：妈妈、爸爸、小明……"
+              placeholder="输入昵称"
               autoFocus
             />
           </label>
